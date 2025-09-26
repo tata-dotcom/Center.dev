@@ -87,7 +87,7 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const getPermissions = (role: string, userId: string): UserPermissions => {
+  const getPermissions = (role: string, _userId: string): UserPermissions => {
     switch (role) {
       case 'admin':
         return {

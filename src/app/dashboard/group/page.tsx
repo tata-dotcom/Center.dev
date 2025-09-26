@@ -6,9 +6,11 @@ import { useAuth } from '@/hooks/useAuth';
 
 import { Group } from '@/types/database';
 
+// FIXED: Added status property
 interface GroupWithMembers extends Group {
   members: number;
   profiles?: { full_name: string };
+  status?: string;
 }
 
 export default function GroupsPage() {
@@ -42,7 +44,7 @@ export default function GroupsPage() {
     if (error) {
       console.error("Error fetching groups:", error.message);
     } else {
-      const mapped = (data || []).map((g: any) => ({
+      const mapped = (data || []).map((g: GroupWithMembers & { group_students?: Array<{ count: number }> }) => ({
         ...g,
         members: g.group_students?.[0]?.count || 0,
       }));
@@ -70,7 +72,7 @@ export default function GroupsPage() {
     const duration_minutes = parseInt((form.elements.namedItem("duration_minutes") as HTMLInputElement).value);
     
     const schedule_days = Array.from(form.querySelectorAll('input[name="schedule_days"]:checked'))
-      .map((input: any) => input.value);
+      .map((input) => (input as HTMLInputElement).value);
 
     const { data, error } = await supabase
       .from("groups")
@@ -254,10 +256,11 @@ export default function GroupsPage() {
                       <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
                       <p className="text-sm text-gray-600">{group.subject} - {group.level}</p>
                     </div>
+                    {/* FIXED: Added optional chaining for status */}
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       group.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {group.status}
+                      {group.status || 'unknown'}
                     </span>
                   </div>
                   

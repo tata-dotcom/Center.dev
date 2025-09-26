@@ -8,6 +8,11 @@ const BarcodeScannerComponent = dynamic(
   { ssr: false }
 );
 
+// Define the ScanResult type
+interface ScanResult {
+  getText(): string;
+}
+
 export default function QRScannerPage() {
   const [scanResult, setScanResult] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -17,7 +22,7 @@ export default function QRScannerPage() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
 
   const lastScanRef = useRef<string>("");
-  const lockRef = useRef<boolean>(false); // ✅ لمنع تكرار الإرسال
+  const lockRef = useRef<boolean>(false);
 
   // Responsive scanner dimensions
   useEffect(() => {
@@ -65,42 +70,40 @@ export default function QRScannerPage() {
 
   // Handle scan
   const handleScan = useCallback(
-    (err: any, result: any) => {
+    (arg0: unknown, arg1?: ScanResult) => {
+      const result = arg1 ?? null; // convert undefined → null
       if (result && !lockRef.current) {
         const text = result.getText().trim();
-
         if (text && text !== lastScanRef.current) {
           lastScanRef.current = text;
           setScanResult(text);
           sendToWebhook(text);
 
-          // ✅ قفل لمدة 3 ثوانٍ عشان ميكررش الإرسال
           lockRef.current = true;
-          setTimeout(() => {
-            lockRef.current = false;
-          }, 3000);
+          setTimeout(() => (lockRef.current = false), 3000);
         }
-      } else if (err) {
-        console.warn("QR Scan Error:", err);
+      } else if (arg0) {
+        console.warn("QR Scan Error:", arg0);
       }
     },
     [sendToWebhook]
   );
 
-  // Reset
+  // Reset scan
   const resetScan = () => {
     setScanResult("");
     setError(null);
     setSuccessMessage(null);
     lastScanRef.current = "";
+    setCameraEnabled(true);
   };
 
-  // Copy
+  // Copy scanned result
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(scanResult);
       setSuccessMessage("📋 Copied to clipboard!");
-    } catch {
+    } catch (_error) {
       setError("Failed to copy to clipboard.");
     }
   };
@@ -113,7 +116,7 @@ export default function QRScannerPage() {
         </h1>
 
         <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col items-center space-y-4">
-          {cameraEnabled && !scanResult ? (
+          {cameraEnabled && !scanResult && (
             <>
               <p className="text-sm text-gray-600 text-center">
                 Point your camera at a QR code to scan it.
@@ -138,7 +141,7 @@ export default function QRScannerPage() {
                 🚫 Stop Camera
               </button>
             </>
-          ) : null}
+          )}
 
           {!cameraEnabled && !scanResult && (
             <button

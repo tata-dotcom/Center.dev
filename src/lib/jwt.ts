@@ -4,7 +4,7 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'fallback-secret-key-min-32-chars'
 )
 
-export async function signJWT(payload: Record<string, any>, expiresIn: string = '24h') {
+export async function signJWT(payload: Record<string, unknown>, expiresIn: string = '24h') {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime(expiresIn)

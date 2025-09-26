@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaGithub, FaEye, FaEyeSlash, FaCheck } from "react-icons/fa";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
@@ -165,9 +166,11 @@ export default function SignUpForm() {
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-20 w-40 items-center justify-center rounded-md  overflow-hidden">
-                <img  
-                  src="/logom.png"   // مسار اللوجو داخل public/
+                <Image  
+                  src="/logom.png"
                   alt="Debai Logo"
+                  width={160}
+                  height={80}
                   className="h-full w-full object-contain"
                 />
               </div>

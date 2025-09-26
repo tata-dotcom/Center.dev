@@ -14,7 +14,7 @@ export function ProtectedAction({
   groupTeacherId, 
   fallback = null 
 }: ProtectedActionProps) {
-  const { permissions, loading } = useAuth()
+  const { permissions, loading, user } = useAuth()
 
   if (loading) return null
 
@@ -23,7 +23,9 @@ export function ProtectedAction({
       case 'create':
         return permissions.canCreateGroups
       case 'edit':
-        return permissions.canEditGroup(groupTeacherId)
+        // Fixed: Use canEditGroups and check teacher ID if provided
+        return permissions.canEditGroups && 
+               (groupTeacherId ? groupTeacherId === user?.id : true)
       case 'delete':
         return permissions.canDeleteGroups
       case 'view':
